@@ -1,0 +1,18 @@
+#!/bin/sh
+# devtmpfs does not get automounted for initramfs
+/bin/mount -t devtmpfs devtmpfs /dev
+if [ -z "${ROOT_SWITCHED}" ]; then
+	if mount -t tmpfs -o size=90% tmpfs /mnt; then
+		if tar -C / --exclude=mnt -cf - . | tar -C /mnt/ -xf -; then
+			mkdir /mnt/mnt
+			export ROOT_SWITCHED=true
+			exec switch_root /mnt /init
+		fi
+	fi
+fi
+/bin/mount -t devtmpfs devtmpfs /dev
+exec 0</dev/console
+exec 1>/dev/console
+exec 2>/dev/console
+#exec /bin/sh
+exec /sbin/init $*

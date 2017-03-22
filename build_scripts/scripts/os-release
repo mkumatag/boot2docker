@@ -1,0 +1,10 @@
+NAME=Boot2Docker
+VERSION=1.12.0
+ID=boot2docker
+ID_LIKE=tcl
+VERSION_ID=1.12.0
+PRETTY_NAME="Boot2Docker 1.12.0 (TCL 7.2); HEAD : e030bab - Fri Jul 29 00:29:14 UTC 2016"
+ANSI_COLOR="1;34"
+HOME_URL="http://boot2docker.io"
+SUPPORT_URL="https://github.com/boot2docker/boot2docker"
+BUG_REPORT_URL="https://github.com/boot2docker/boot2docker/issues"
