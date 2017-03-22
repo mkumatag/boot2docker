@@ -15,6 +15,8 @@ make build
 
 make binary
 
+mkdir ../../build_scripts/docker-binaries/
+
 cp  ./bundles/$DOCKER_TAG/binary-daemon/* ./bundles/$DOCKER_TAG/binary-client/*  ../../build_scripts/docker-binaries/
 cd ../../build_scripts/docker-binaries/
 
@@ -25,7 +27,7 @@ sudo chown root *
 
 cd ../
 
-#sudo docker build -t boot2docker-ppc64le  .
+sudo docker build -t boot2docker-ppc64le  .
 
 
 
