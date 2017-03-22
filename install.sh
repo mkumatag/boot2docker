@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 ##################################################################
-# Copyright (c) 2017 IBM Corp. Rights Reserved.
-# This project is licensed under the Apache License 2.0, see LICENSE.
 #
 # Install script for installing boot2docker for power architecture
 #
