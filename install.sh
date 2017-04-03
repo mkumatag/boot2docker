@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 ##################################################################
+# Copyright (c) 2017 IBM Corp. Rights Reserved.
+# This project is licensed under the Apache License 2.0, see LICENSE.
 #
 # Install script for installing boot2docker for power architecture
 #
@@ -8,7 +10,7 @@
 
 #set -x
 
-VERSION="v1.13.1"
+VERSION="17.03.0-ce"
 ISOPATH="$HOME/.docker/machine"
 ISOFILE="boot2docker-${VERSION}.iso"
 # TO-DO : Update with proper link once we get the binaries out
@@ -76,6 +78,38 @@ install_docker-machine()
         esac
 
 }
+
+suggest_docker()
+{
+        echo "Please refer instructions from https://docs.docker.com/engine/installation/ to install docker"
+        while true; do
+                read -p "Do you want me to install for you? " ans
+                case $ans in
+                        [Yy]* ) install_docker;echo "PASS";return;;
+                        [Nn]* ) return;;
+                        * ) echo "Please answer yes or no.";;
+                esac
+        done
+}
+
+install_docker()
+{
+        case ${OS} in
+                Linux )
+			curl -fsSL https://test.docker.com/ | sudo sh 
+			sudo usermod -aG docker ${USER}
+			echo "*******************************************************************************"
+			echo "Remember that you will have to log out and back in for this to take effect....!"
+                        echo "*******************************************************************************"
+                        return;;
+                Darwin ) curl -s -L https://github.com/docker/machine/releases/download/v0.9.0/docker-machine-`uname -s`-`uname -m` >/usr/local/bin/docker-machine && \
+                        chmod +x /usr/local/bin/docker-machine
+                        return;;
+                * ) echo "I don't know how to install for this distro ${OS}...";exit 1;;
+        esac
+
+}
+
 
 suggest_qemu-system-ppc64()
 {
@@ -181,14 +215,49 @@ precheck_common()
 
 precheck_linux()
 {
-	linux_prereq_cmds=( md5sum libvirtd qemu-system-ppc64 )
+	linux_prereq_cmds=( md5sum libvirtd qemu-system-ppc64 docker )
         for i in "${linux_prereq_cmds[@]}"
         do
                 precheck_cmd $i
         done
-
+	check_libvirt_group
 }
 
+check_libvirt_group()
+{
+	getdistro
+	if [[ "${DISTRO}" == "Ubuntu" ]]; then
+                libvirtgroup="libvirtd"
+        elif [[ "${DISTRO}" == "Fedora" ]]; then
+                libvirtgroup="libvirt"
+        else
+                echo "You are running on unsupported linux Distro[${DISTRO}]..."
+                exit 1
+        fi
+        echo "Checking user is part for ${libvirtgroup} group or not..."
+        groups ${USER} | grep ${libvirtgroup}
+        if [[ $? == 0 ]]; then
+                echo "CHECK PASSED: user ${USER} is already part of ${libvirtgroup} group.."
+		return
+        else
+		echo "User: ${USER} is not part of ${libvirtgroup} group"
+		while true; do
+                	read -p "Do you want me to add ${USER} to ${libvirtgroup} group...? " ans
+	                case $ans in
+        	                [Yy]* )
+					sudo usermod -a -G ${libvirtgroup} ${USER}
+					echo "*******************************************************************************"
+		                        echo "Remember that you will have to log out and back in for this to take effect....!"
+                		        echo "*******************************************************************************"
+					return;;
+                	        [Nn]* ) 
+					echo -e "\nYou may face issues while running docker-machine if user is not part of ${libvirtgroup} group, please make sure to add user manually to ${libvirtgroup} and relogin before running docker-machine\n"
+					return;;
+                        	* ) echo "Please answer yes or no.";;
+	                esac
+        	done
+	fi
+}
 precheck_darwin()
 {
 	darwin_prereq_cmds=( brew md5 qemu-system-ppc64 )
@@ -228,31 +297,27 @@ download_boot2docker()
 
 precheck
 
-#echo "Checking for docker-machine-driver-qemu"
-#read CMDRET CMDPATH < <(check_cmd_installed docker-machine-driver-qemu)
+echo "Pulling docker-machine-driver-qemu from repo...."
+case "${OS}" in
+	"Linux")  DRIVER="${REPOURL}/docker-machine-driver-qemu/linux/docker-machine-driver-qemu"
+		;;
+	"Darwin") DRIVER="${REPOURL}/docker-machine-driver-qemu/darwin/docker-machine-driver-qemu"
+		;;
+	*) echo "${OS} does not support"
+		exit 1
+		;;
+esac
 
-#if [[ ${CMDRET} != 0 ]]; then
-	#echo "Unable to find docker-machine-driver-qemu in the path, pulling it from the repository"
-	echo "Pulling docker-machine-driver-qemu from repo...."
-	case "${OS}" in
-		"Linux")  DRIVER="${REPOURL}/docker-machine-driver-qemu/linux/docker-machine-driver-qemu"
-			  ;;
-		"Darwin") DRIVER="${REPOURL}/docker-machine-driver-qemu/darwin/docker-machine-driver-qemu"
-			  ;;
-		*) echo "${OS} does not support"
-		   exit 1
-		   ;;
-	esac
-	curl -s -f ${DRIVER} -o /tmp/docker-machine-driver-qemu
-	chmod +x /tmp/docker-machine-driver-qemu
-	sudo cp /tmp/docker-machine-driver-qemu ${INSTALLBIN}/docker-machine-driver-qemu
-	if [[ $? != 0 ]]; then
-		echo "Failed to pull docker-machine-driver-qemu from ${DRIVER}"
-	fi
-#else
-#	echo "Found at ${CMDPATH}"
-#fi
+curl -s -f ${DRIVER} -o /tmp/docker-machine-driver-qemu
+chmod +x /tmp/docker-machine-driver-qemu
+sudo cp /tmp/docker-machine-driver-qemu ${INSTALLBIN}/docker-machine-driver-qemu
 
+if [[ $? != 0 ]]; then
+	echo "Failed to pull docker-machine-driver-qemu from ${DRIVER}"
+	exit 1
+fi
+
+echo "Checking for \"${ISOPATH}/${ISOFILE}\"..."
 if [[ ! -f ${ISOPATH}/${ISOFILE} ]]; then
 	echo "${ISOPATH}/${ISOFILE} not found, pulling it from repository....."
 	download_boot2docker
