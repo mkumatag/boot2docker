@@ -40,7 +40,6 @@ getdistro()
 # Check prereq to run this script
 precheck()
 {
-	echo "TO-DO: Checking Prereq.....";
 	precheck_common
 	if [[ ${OS} == "Linux" ]]; then
 		precheck_linux
@@ -55,7 +54,7 @@ suggest_docker-machine()
 {
 	echo "Please refer instructions from https://docs.docker.com/machine/install-machine/ to install docker-machine"
         while true; do
-                read -p "Do you want me to install for you? " ans
+                read -p "Do you want me to install for you?[y/n]:" ans
                 case $ans in
                         [Yy]* ) install_docker-machine;echo "PASS";return;;
                         [Nn]* ) return;;
@@ -83,7 +82,7 @@ suggest_docker()
 {
         echo "Please refer instructions from https://docs.docker.com/engine/installation/ to install docker"
         while true; do
-                read -p "Do you want me to install for you? " ans
+                read -p "Do you want me to install for you?[y/n]:" ans
                 case $ans in
                         [Yy]* ) install_docker;echo "PASS";return;;
                         [Nn]* ) return;;
@@ -117,7 +116,7 @@ suggest_qemu-system-ppc64()
 	echo -e "For Mac:\nFollow instructions from https://github.com/psema4/pine/wiki/Installing-QEMU-on-OS-X and install the qemu\n"
 
 	while true; do
-		read -p "Do you want me to install for you? " ans
+		read -p "Do you want me to install for you?[y/n]:" ans
 		case $ans in
 			[Yy]* ) install_qemu-system-ppc64;return;;
 			[Nn]* ) return;;
@@ -131,7 +130,9 @@ install_qemu-system-ppc64()
 	getdistro
 	case "$DISTRO" in
 		"Darwin" ) brew install qemu; return;;
-		"Fedora" ) sudo dnf install -y qemu-system-ppc; return;;
+		"Fedora" ) 
+			sudo dnf install -y qemu qemu-system-ppc
+			return;;
 		"Ubuntu" ) sudo apt-get install -y qemu-system-ppc;;
 #		"Redhat" ) return;;
 		* ) echo "I don't know how to install for this distro : ${DISTRO}";return 1;;
@@ -143,7 +144,7 @@ suggest_libvirtd()
         echo -e "Refer link: https://libvirt.org/compiling.html for more information\n"
 
         while true; do
-                read -p "Do you want me to install for you? " ans
+                read -p "Do you want me to install for you?[y/n]:" ans
                 case $ans in
                         [Yy]* ) install_libvirtd;return;;
                         [Nn]* ) return;;
@@ -157,7 +158,7 @@ suggest_brew()
 	echo -e "Refer link: https://brew.sh/ for installation\n"
 
         while true; do
-                read -p "Do you want me to install for you? " ans
+                read -p "Do you want me to install for you?[y/n]:" ans
                 case $ans in
                         [Yy]* ) install_brew;return;;
                         [Nn]* ) return;;
@@ -176,7 +177,11 @@ install_libvirtd()
 {
         getdistro
         case "$DISTRO" in
-                "Fedora" ) sudo dnf install -y libvirt;sudo systemctl start libvirtd; return;;
+                "Fedora" )
+			sudo dnf install -y libvirt
+			sudo systemctl start libvirtd
+			sudo systemctl start virtlogd
+			return;;
                 "Ubuntu" ) sudo apt-get install -y libvirt-bin; sudo systemctl start libvirtd; return;;
 #               "Redhat" ) return;;
                 * ) echo "I don't know how to install for this distro...";return 1;;
@@ -242,7 +247,7 @@ check_libvirt_group()
         else
 		echo "User: ${USER} is not part of ${libvirtgroup} group"
 		while true; do
-                	read -p "Do you want me to add ${USER} to ${libvirtgroup} group...? " ans
+			read -p "Do you want me to add ${USER} to ${libvirtgroup} group...?[y/n]:" ans
 	                case $ans in
         	                [Yy]* )
 					sudo usermod -a -G ${libvirtgroup} ${USER}
