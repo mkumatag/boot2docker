@@ -14,7 +14,7 @@ VERSION="17.03.0-ce"
 ISOPATH="$HOME/.docker/machine"
 ISOFILE="boot2docker-${VERSION}.iso"
 # TO-DO : Update with proper link once we get the binaries out
-REPOURL="http://ftp.unicamp.br/pub/ppc64le/boot2docker"
+REPOURL="http://ftp.unicamp.br/pub/ppc64el/boot2docker"
 INSTALLBIN="/usr/local/bin"
 OS=$(uname -s)
 DISTRO=""
