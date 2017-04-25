@@ -5,15 +5,29 @@
 # This project is licensed under the Apache License 2.0, see LICENSE.
 #
 # Install script for installing boot2docker for power architecture
+# Usage:
+#	./install [OPTION]
+#	Options:
+#		-s|--silent - for unattended installation
 #
 ##################################################################
 
 #set -x
 
+silent=${1:-}
+
+if [[ -n $silent && ( "$silent" != "-s" && "$silent" != "--silent") ]]; then
+	echo "Invalid option : $@"
+	echo "Usage:"
+	echo -e "\t./install [OPTION]"
+	echo -e "\tOptions:"
+	echo -e "\t\t-s|--silent - for unattended installation"
+	exit 1
+fi
+
 VERSION="17.03.0-ce"
 ISOPATH="$HOME/.docker/machine"
 ISOFILE="boot2docker-${VERSION}.iso"
-# TO-DO : Update with proper link once we get the binaries out
 REPOURL="http://ftp.unicamp.br/pub/ppc64el/boot2docker"
 INSTALLBIN="/usr/local/bin"
 OS=$(uname -s)
@@ -54,7 +68,11 @@ suggest_docker-machine()
 {
 	echo "Please refer instructions from https://docs.docker.com/machine/install-machine/ to install docker-machine"
         while true; do
-                read -p "Do you want me to install for you?[y/n]:" ans
+		if [[ -n $silent ]]; then
+			ans=yes
+		else
+			read -p "Do you want me to install for you?[y/n]:" ans
+		fi
                 case $ans in
                         [Yy]* ) install_docker-machine;echo "PASS";return;;
                         [Nn]* ) return;;
@@ -82,7 +100,11 @@ suggest_docker()
 {
         echo "Please refer instructions from https://docs.docker.com/engine/installation/ to install docker"
         while true; do
-                read -p "Do you want me to install for you?[y/n]:" ans
+		if [[ -n $silent ]]; then
+                        ans=yes
+                else
+			read -p "Do you want me to install for you?[y/n]:" ans
+                fi
                 case $ans in
                         [Yy]* ) install_docker;echo "PASS";return;;
                         [Nn]* ) return;;
@@ -116,7 +138,11 @@ suggest_qemu-system-ppc64()
 	echo -e "For Mac:\nFollow instructions from https://github.com/psema4/pine/wiki/Installing-QEMU-on-OS-X and install the qemu\n"
 
 	while true; do
-		read -p "Do you want me to install for you?[y/n]:" ans
+		if [[ -n $silent ]]; then
+                        ans=yes
+                else
+			read -p "Do you want me to install for you?[y/n]:" ans
+		fi
 		case $ans in
 			[Yy]* ) install_qemu-system-ppc64;return;;
 			[Nn]* ) return;;
@@ -133,7 +159,7 @@ install_qemu-system-ppc64()
 		"Fedora" ) 
 			sudo dnf install -y qemu qemu-system-ppc
 			return;;
-		"Ubuntu" ) sudo apt-get install -y qemu-system-ppc;;
+		"Ubuntu" ) sudo apt-get update -y; sudo apt-get install -y qemu-system-ppc;;
 #		"Redhat" ) return;;
 		* ) echo "I don't know how to install for this distro : ${DISTRO}";return 1;;
 	esac
@@ -144,7 +170,11 @@ suggest_libvirtd()
         echo -e "Refer link: https://libvirt.org/compiling.html for more information\n"
 
         while true; do
-                read -p "Do you want me to install for you?[y/n]:" ans
+		if [[ -n $silent ]]; then
+                        ans=yes
+                else
+			read -p "Do you want me to install for you?[y/n]:" ans
+		fi
                 case $ans in
                         [Yy]* ) install_libvirtd;return;;
                         [Nn]* ) return;;
@@ -158,7 +188,11 @@ suggest_brew()
 	echo -e "Refer link: https://brew.sh/ for installation\n"
 
         while true; do
-                read -p "Do you want me to install for you?[y/n]:" ans
+		if [[ -n $silent ]]; then
+                        ans=yes
+                else
+			read -p "Do you want me to install for you?[y/n]:" ans
+		fi
                 case $ans in
                         [Yy]* ) install_brew;return;;
                         [Nn]* ) return;;
@@ -182,7 +216,7 @@ install_libvirtd()
 			sudo systemctl start libvirtd
 			sudo systemctl start virtlogd
 			return;;
-                "Ubuntu" ) sudo apt-get install -y libvirt-bin; sudo systemctl start libvirtd; return;;
+                "Ubuntu" ) sudo apt-get update -y; sudo apt-get install -y libvirt-bin; sudo systemctl start libvirtd; return;;
 #               "Redhat" ) return;;
                 * ) echo "I don't know how to install for this distro...";return 1;;
         esac
@@ -247,7 +281,11 @@ check_libvirt_group()
         else
 		echo "User: ${USER} is not part of ${libvirtgroup} group"
 		while true; do
-			read -p "Do you want me to add ${USER} to ${libvirtgroup} group...?[y/n]:" ans
+			if [[ -n $silent ]]; then
+				ans=yes
+	                else
+				read -p "Do you want me to add ${USER} to ${libvirtgroup} group...?[y/n]:" ans
+			fi
 	                case $ans in
         	                [Yy]* )
 					sudo usermod -a -G ${libvirtgroup} ${USER}
@@ -353,4 +391,8 @@ fi
 ln -s -f ${ISOPATH}/${ISOFILE} ${ISOPATH}/boot2docker.iso
 
 echo -e "\n\nNow run the following command to start boot2docker for ppc64le:"
-echo -e "\ndocker-machine -D create -d qemu --qemu-boot2docker-url=${ISOPATH}/boot2docker.iso --qemu-memory <RAM> --qemu-arch ppc64le <NAME>\n\nRAM: should be in MB, mininum is 2048"
+echo -e "\ndocker-machine create -d qemu --qemu-boot2docker-url=${ISOPATH}/boot2docker.iso --qemu-memory <RAM> --qemu-arch ppc64le <NAME>\n\nRAM: should be in MB, mininum is 2048"
+echo -e "\n"
+echo "*******************************************************************************"
+echo "Remember that you will have to log out and back in for this to take effect....!"
+echo "*******************************************************************************"
