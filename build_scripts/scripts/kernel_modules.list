@@ -462,6 +462,8 @@
 ./net/netfilter/x_tables.ko
 ./net/netfilter/xt_addrtype.ko
 ./net/netfilter/xt_conntrack.ko
+./net/netfilter/xt_nat.ko
+./net/netfilter/xt_tcpudp.ko
 ./net/netlink/netlink_diag.ko
 ./net/packet/af_packet_diag.ko
 ./net/rfkill/rfkill-gpio.ko
