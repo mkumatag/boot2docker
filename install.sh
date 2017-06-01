@@ -25,7 +25,7 @@ if [[ -n $silent && ( "$silent" != "-s" && "$silent" != "--silent") ]]; then
 	exit 1
 fi
 
-VERSION="17.03.0-ce"
+VERSION="17.03.1-ce"
 ISOPATH="$HOME/.docker/machine"
 ISOFILE="boot2docker-${VERSION}.iso"
 REPOURL="http://ftp.unicamp.br/pub/ppc64el/boot2docker"
@@ -391,7 +391,7 @@ fi
 ln -s -f ${ISOPATH}/${ISOFILE} ${ISOPATH}/boot2docker.iso
 
 echo -e "\n\nNow run the following command to start boot2docker for ppc64le:"
-echo -e "\ndocker-machine create -d qemu --qemu-boot2docker-url=${ISOPATH}/boot2docker.iso --qemu-memory <RAM> --qemu-arch ppc64le <NAME>\n\nRAM: should be in MB, mininum is 2048"
+echo -e "\ndocker-machine create -d qemu --qemu-boot2docker-url=${ISOPATH}/boot2docker.iso --qemu-memory <RAM> --qemu-cache-mode none --qemu-arch ppc64le <NAME>\n\nRAM: should be in MB, mininum is 2048"
 echo -e "\n"
 echo "*******************************************************************************"
 echo "Remember that you will have to log out and back in for this to take effect....!"

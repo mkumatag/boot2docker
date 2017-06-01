@@ -3,7 +3,7 @@
 sudo apt-get -y install git make docker docker.io
 
 DOCKER_REPO="https://github.com/docker/docker"
-DOCKER_TAG="17.03.0-ce"
+DOCKER_TAG="17.03.1-ce"
 
 mkdir -p docker-src
 cd docker-src
