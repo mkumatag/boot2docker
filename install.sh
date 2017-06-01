@@ -25,7 +25,7 @@ if [[ -n $silent && ( "$silent" != "-s" && "$silent" != "--silent") ]]; then
 	exit 1
 fi
 
-VERSION="17.03.0-ce"
+VERSION="17.03.1-ce"
 ISOPATH="$HOME/.docker/machine"
 ISOFILE="boot2docker-${VERSION}.iso"
 REPOURL="http://ftp.unicamp.br/pub/ppc64el/boot2docker"
